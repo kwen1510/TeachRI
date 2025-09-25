@@ -10,53 +10,46 @@
   <main class="container">
     <header>
       <h1>TeachRI Lesson Reflection Assistant</h1>
-      <p>Upload your lesson materials to receive targeted coaching insights.</p>
+      <p>Upload lesson artifacts or work with the built-in samples to preview instructional coaching insights instantly.</p>
     </header>
 
-    <section class="card">
-      <h2>Classroom Audio (Optional)</h2>
-      <p class="hint">Audio transcription runs through OpenAI Speech-to-Text when a file is provided.</p>
-      <form id="transcription-form" enctype="multipart/form-data">
-        <input type="file" id="audio" name="audio" accept="audio/*" />
-        <button type="submit">Transcribe Audio</button>
-      </form>
-      <pre id="transcription-result" class="code-block hidden"></pre>
-    </section>
-
-    <section class="card">
-      <h2>Generate Feedback</h2>
-      <form id="analysis-form">
-        <label for="transcriptionJson">Transcription JSON with timestamps</label>
-        <textarea id="transcriptionJson" name="transcriptionJson" rows="10">[
-  {
-    "timestamp": "00:00-00:45",
-    "speaker": "Teacher",
-    "text": "Good morning everyone! Today we're exploring ecosystems."
-  },
-  {
-    "timestamp": "00:45-01:30",
-    "speaker": "Student A",
-    "text": "An ecosystem is where living and non-living things interact."
-  },
-  {
-    "timestamp": "01:30-02:15",
-    "speaker": "Teacher",
-    "text": "Exactly. Turn to your partner and discuss how humans impact local ecosystems."
-  }
-]</textarea>
-
-        <label for="researchText">Research Notes</label>
-        <textarea id="researchText" name="researchText" rows="6">Placeholder research note: Focus on inquiry-based learning to support student agency and use formative feedback techniques (Black & Wiliam, 2018).</textarea>
-
-        <label for="lessonPlan">Lesson Plan Overview</label>
-        <textarea id="lessonPlan" name="lessonPlan" rows="6">Lesson Objective: Students will describe how human actions can support or disrupt the balance of local ecosystems.\nPlanned Activities: Warm-up question, mini-lecture, partner discussion, exit ticket reflection.</textarea>
-
-        <button type="submit">Generate Coaching Feedback</button>
-      </form>
-      <section id="feedback" class="card hidden">
-        <h3>Coaching Insights</h3>
-        <article id="feedback-content"></article>
+    <div class="card-grid">
+      <section class="card">
+        <h2>Classroom Audio (Optional)</h2>
+        <p class="hint">Upload a recording to transcribe it with OpenAI or skip the upload to view a sample transcript.</p>
+        <form id="transcription-form" enctype="multipart/form-data">
+          <label class="sr-only" for="audio">Classroom audio upload</label>
+          <input type="file" id="audio" name="audio" accept="audio/*" />
+          <div class="button-row">
+            <button type="submit">Transcribe Audio</button>
+            <button type="button" id="load-sample" class="ghost">Use Sample Data</button>
+          </div>
+        </form>
+        <p id="transcription-note" class="status-note hidden" role="status" aria-live="polite"></p>
+        <pre id="transcription-result" class="code-block hidden" aria-live="polite"></pre>
       </section>
+
+      <section class="card">
+        <h2>Generate Feedback</h2>
+        <form id="analysis-form">
+          <label for="transcriptionJson">Transcription JSON with timestamps</label>
+          <textarea id="transcriptionJson" name="transcriptionJson" rows="10"></textarea>
+
+          <label for="researchText">Research Notes</label>
+          <textarea id="researchText" name="researchText" rows="6"></textarea>
+
+          <label for="lessonPlan">Lesson Plan Overview</label>
+          <textarea id="lessonPlan" name="lessonPlan" rows="6"></textarea>
+
+          <button type="submit">Generate Coaching Feedback</button>
+        </form>
+      </section>
+    </div>
+
+    <section id="feedback" class="card hidden feedback-card">
+      <h3>Coaching Insights</h3>
+      <p id="feedback-note" class="status-note hidden" role="status" aria-live="polite"></p>
+      <article id="feedback-content"></article>
     </section>
   </main>
 

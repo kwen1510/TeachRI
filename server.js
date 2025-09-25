@@ -12,9 +12,6 @@ dotenv.config();
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-const app = express();
-const upload = multer({ dest: path.join(__dirname, 'uploads') });
-
 const port = process.env.PORT || 3000;
 const openaiApiKey = process.env.OPENAI_API_KEY;
 
@@ -22,7 +19,48 @@ if (!openaiApiKey) {
   console.warn('Warning: OPENAI_API_KEY is not set. API routes will fail until it is provided.');
 }
 
-const openai = new OpenAI({ apiKey: openaiApiKey });
+const openai = openaiApiKey ? new OpenAI({ apiKey: openaiApiKey }) : null;
+
+const SAMPLE_TRANSCRIPTION = {
+  text: 'Sample transcription generated locally.',
+  segments: [
+    {
+      id: 1,
+      start: '00:00',
+      end: '00:45',
+      speaker: 'Teacher',
+      text: 'Good morning everyone! Today we are exploring ecosystems and how they change over time.'
+    },
+    {
+      id: 2,
+      start: '00:45',
+      end: '01:12',
+      speaker: 'Student A',
+      text: 'An ecosystem is the relationship between living things and the environment around them.'
+    },
+    {
+      id: 3,
+      start: '01:12',
+      end: '02:04',
+      speaker: 'Teacher',
+      text: 'Turn and talk with a partner about ways our class can protect the pollinator garden this spring.'
+    }
+  ]
+};
+
+const SAMPLE_FEEDBACK = `Lesson strengths\n- Students engaged in collaborative dialogue and used academic vocabulary to describe ecosystems.\n- The lesson objective was revisited throughout the discussion which kept learners focused.\n\nSuggestions\n- Include a quick formative check (thumbs up/down or digital poll) to capture every student voice.\n- Provide a sentence stem or graphic organizer to support learners who need structure in partner discussions.\n\nNext steps\n1. Capture student ideas on an anchor chart to revisit next class.\n2. Ask students to connect their discussion to a real-world action they can take this week.`;
+
+function ensureUploadsDir() {
+  const uploadsPath = path.join(__dirname, 'uploads');
+  if (!fs.existsSync(uploadsPath)) {
+    fs.mkdirSync(uploadsPath, { recursive: true });
+  }
+}
+
+ensureUploadsDir();
+
+const app = express();
+const upload = multer({ dest: path.join(__dirname, 'uploads') });
 
 app.use(cors());
 app.use(express.json({ limit: '5mb' }));
@@ -31,15 +69,18 @@ app.use(express.static(path.join(__dirname, 'public')));
 
 app.post('/api/transcribe', upload.single('audio'), async (req, res) => {
   if (!req.file) {
-    return res.status(400).json({ error: 'No audio file uploaded.' });
-  }
-
-  if (!openaiApiKey) {
-    fs.unlink(req.file.path, () => {});
-    return res.status(500).json({ error: 'OpenAI API key not configured on the server.' });
+    return res.json({
+      transcription: SAMPLE_TRANSCRIPTION,
+      note: 'No audio uploaded. Returned sample transcription so you can test the UI.'
+    });
   }
 
   try {
+    if (!openaiApiKey || !openai) {
+      fs.unlink(req.file.path, () => {});
+      return res.json({ transcription: SAMPLE_TRANSCRIPTION, note: 'Returned sample transcription because no API key was configured.' });
+    }
+
     const transcription = await openai.audio.transcriptions.create({
       file: fs.createReadStream(req.file.path),
       model: 'gpt-4o-mini-transcribe'
@@ -51,6 +92,9 @@ app.post('/api/transcribe', upload.single('audio'), async (req, res) => {
   } catch (error) {
     console.error('Transcription error:', error);
     fs.unlink(req.file.path, () => {});
+    if (!openaiApiKey || !openai) {
+      return res.json({ transcription: SAMPLE_TRANSCRIPTION, note: 'Returned sample transcription because the OpenAI request could not be completed.' });
+    }
     return res.status(500).json({
       error: 'Failed to transcribe audio with OpenAI.',
       details: error?.response?.data || error.message
@@ -65,10 +109,6 @@ app.post('/api/analyze', async (req, res) => {
     return res.status(400).json({
       error: 'transcriptionJson, researchText, and lessonPlan are required fields.'
     });
-  }
-
-  if (!openaiApiKey) {
-    return res.status(500).json({ error: 'OpenAI API key not configured on the server.' });
   }
 
   let parsedTranscript;
@@ -104,6 +144,13 @@ app.post('/api/analyze', async (req, res) => {
     `Keep the tone encouraging, specific, and professional.`;
 
   try {
+    if (!openaiApiKey || !openai) {
+      return res.json({
+        feedback: SAMPLE_FEEDBACK,
+        note: 'Returned sample feedback because no API key was configured.'
+      });
+    }
+
     const response = await openai.responses.create({
       model: 'gpt-4.1-mini',
       input: [
@@ -127,6 +174,12 @@ app.post('/api/analyze', async (req, res) => {
     });
   } catch (error) {
     console.error('Analysis error:', error);
+    if (!openaiApiKey || !openai) {
+      return res.json({
+        feedback: SAMPLE_FEEDBACK,
+        note: 'Returned sample feedback because the OpenAI request could not be completed.'
+      });
+    }
     return res.status(500).json({
       error: 'Failed to generate feedback with OpenAI.',
       details: error?.response?.data || error.message
