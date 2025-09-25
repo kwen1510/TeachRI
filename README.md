@@ -6,7 +6,7 @@ This project is a Node.js + Express prototype designed for deployment on Render.
 
 - Upload classroom audio to request speech-to-text transcription via OpenAI's `gpt-4o-mini-transcribe` model.
 - Submit transcription JSON, research references, and lesson plan text to generate tailored coaching insights using the `gpt-4.1-mini` model.
-- Simple responsive UI for quick testing and iteration.
+- Simple responsive UI with built-in sample data for quick testing and iteration.
 
 ## Prerequisites
 
@@ -53,11 +53,11 @@ This project is a Node.js + Express prototype designed for deployment on Render.
 
 ## API Routes
 
-- `POST /api/transcribe`: Accepts `multipart/form-data` with an `audio` file field. Returns JSON from OpenAI's speech-to-text API.
-- `POST /api/analyze`: Accepts JSON with `transcriptionJson`, `researchText`, and `lessonPlan` fields. Returns generated coaching feedback.
+- `POST /api/transcribe`: Accepts `multipart/form-data` with an `audio` file field. Returns JSON from OpenAI's speech-to-text API or a locally generated sample when no audio/API key is available.
+- `POST /api/analyze`: Accepts JSON with `transcriptionJson`, `researchText`, and `lessonPlan` fields. Returns generated coaching feedback or a locally generated sample when OpenAI access is unavailable.
 
 ## Notes
 
 - Uploaded audio files are stored temporarily on disk and deleted after transcription completes.
-- The UI includes placeholder text for quick testing when no audio is available.
+- The UI includes built-in sample transcription, research, and lesson plan data that can be previewed without any API calls.
 - Remember to handle usage costs and guard against prompt injection when preparing for production.
