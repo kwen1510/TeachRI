@@ -5,10 +5,22 @@
   --accent: #2563eb;
   --accent-soft: rgba(37, 99, 235, 0.14);
   --bg: #f8fafc;
+  --bg-gradient: radial-gradient(
+      circle at 20% 20%,
+      rgba(37, 99, 235, 0.08),
+      transparent 55%
+    ),
+    radial-gradient(
+      circle at 80% 0%,
+      rgba(14, 165, 233, 0.08),
+      transparent 60%
+    ),
+    var(--bg);
   --card: rgba(255, 255, 255, 0.95);
   --border: #e2e8f0;
   --text: #0f172a;
   --muted: #64748b;
+  --input-bg: rgba(255, 255, 255, 0.96);
 }
 
 *,
@@ -20,9 +32,7 @@
 body {
   margin: 0;
   min-height: 100vh;
-  background: radial-gradient(circle at 20% 20%, rgba(37, 99, 235, 0.08), transparent 55%),
-    radial-gradient(circle at 80% 0%, rgba(14, 165, 233, 0.08), transparent 60%),
-    var(--bg);
+  background: var(--bg-gradient);
   color: var(--text);
 }
 
@@ -95,7 +105,8 @@ input[type='file'] {
   border: 1px solid var(--border);
   padding: 0.9rem 1rem;
   font-size: 0.95rem;
-  background: rgba(255, 255, 255, 0.96);
+  background: var(--input-bg);
+  color: var(--text);
   transition: border-color 0.2s ease, box-shadow 0.2s ease;
 }
 
@@ -221,5 +232,38 @@ button:disabled {
   .ghost,
   button {
     width: 100%;
+  }
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --accent: #60a5fa;
+    --accent-soft: rgba(96, 165, 250, 0.22);
+    --bg: #020617;
+    --bg-gradient: radial-gradient(
+        circle at 20% 20%,
+        rgba(96, 165, 250, 0.18),
+        transparent 55%
+      ),
+      radial-gradient(
+        circle at 80% 0%,
+        rgba(45, 212, 191, 0.12),
+        transparent 60%
+      ),
+      var(--bg);
+    --card: rgba(15, 23, 42, 0.72);
+    --border: rgba(148, 163, 184, 0.35);
+    --text: #e2e8f0;
+    --muted: #cbd5f5;
+    --input-bg: rgba(15, 23, 42, 0.7);
+  }
+
+  button {
+    box-shadow: 0 14px 30px -18px rgba(37, 99, 235, 0.8);
+  }
+
+  .code-block {
+    background: rgba(15, 23, 42, 0.85);
+    color: #f1f5f9;
   }
 }
